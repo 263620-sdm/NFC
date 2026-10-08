@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>두드림 — 목탁 명상</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#e8c89a;
+    --bg-2:#dcb37d;
+    --bg-3:#fbf2e2;
+    --paper:#fbf3e3;
+    --paper-2:#4a3b28;
+    --ink:#2c2013;
+    --ink-soft:#5a4a34;
+    --brass:#a9711f;
+    --brass-light:#8a5a19;
+    --jade:#4d6a56;
+    --ember:#a8492e;
+    --muted:#7d6a4a;
+    --line:rgba(69,45,16,0.18);
+    --radius-lg:28px;
+    --radius-md:18px;
+    --radius-sm:12px;
+    --safe-t:env(safe-area-inset-top,0px);
+    --safe-b:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Noto Sans KR',sans-serif;
+    overflow:hidden;
+    -webkit-user-select:none;user-select:none;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+  body{
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 18%, rgba(255,255,255,0.35), transparent 60%),
+      radial-gradient(ellipse 90% 60% at 50% 100%, rgba(120,78,30,0.12), transparent 65%),
+      linear-gradient(180deg, #f1d9b0 0%, var(--bg) 45%, var(--bg-2) 100%);
+  }
+  h1,h2,h3{font-family:'Noto Serif KR',serif;margin:0;font-weight:600;}
+
+  /* ---------- ambient dust motes ---------- */
+  .embers{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+  .ember{
+    position:absolute;bottom:-10px;width:3px;height:3px;border-radius:50%;
+    background:#fffaf0;opacity:0;filter:blur(0.3px);
+    box-shadow:0 0 5px 1px rgba(255,250,240,0.7);
+    animation:rise linear infinite;
+  }
+  @keyframes rise{
+    0%{transform:translateY(0) translateX(0);opacity:0;}
+    8%{opacity:0.5;}
+    92%{opacity:0.12;}
+    100%{transform:translateY(-92vh) translateX(var(--drift,14px));opacity:0;}
+  }
+
+  /* ---------- app shell ---------- */
+  #app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;}
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:calc(16px + var(--safe-t)) 18px 10px;
+    flex-shrink:0;
+  }
+  .icon-btn{
+    width:40px;height:40px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(44,32,19,0.04);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    color:var(--paper-2);transition:background 0.2s, transform 0.15s, border-color .2s;
+  }
+  .icon-btn:active{transform:scale(0.92);background:rgba(44,32,19,0.1);}
+  .icon-btn svg{width:18px;height:18px;}
+  .icon-btn.invisible{visibility:hidden;pointer-events:none;}
+  .header-title{
+    font-family:'Noto Serif KR',serif;font-size:17px;letter-spacing:0.02em;color:var(--ink);
+    opacity:0.92;
+  }
+
+  main{
+    flex:1;min-height:0;position:relative;
+    display:flex;flex-direction:column;
+  }
+
+  /* ---------- view management ---------- */
+  .view{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transform:translateY(6px);
+    transition:opacity .35s ease, transform .35s ease;
+  }
+  .view.active{opacity:1;pointer-events:auto;transform:translateY(0);}
+
+  /* ---------- HOME / moktak ---------- */
+  #view-home{ padding-bottom:20px; }
+  #view-sutra{
+    justify-content:flex-start;
+    padding-top:2vh;
+    padding-bottom:min(46vh,340px);
+  }
+  .stage-label{
+    font-size:13px;color:var(--muted);letter-spacing:0.12em;margin-bottom:2px;
+    height:18px;
+  }
+  .moktak-wrap{
+    position:relative;width:min(72vw,280px);height:min(72vw,280px);
+    display:flex;align-items:center;justify-content:center;
+    margin-top:4px;
+  }
+  .moktak-glow{
+    position:absolute;inset:-18%;
+    background:radial-gradient(circle, rgba(201,151,63,0.20) 0%, rgba(201,151,63,0.06) 45%, transparent 72%);
+    border-radius:50%;
+    animation:breathe 5.5s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{transform:scale(0.92);opacity:0.7;}
+    50%{transform:scale(1.05);opacity:1;}
+  }
+  .moktak-ring{
+    position:absolute;inset:6%;border-radius:50%;
+    border:1px solid rgba(201,151,63,0.35);
+    opacity:0;
+  }
+  .moktak-ring.pulse{ animation:ringpulse 1s ease-out; }
+  @keyframes ringpulse{
+    0%{opacity:0.55;transform:scale(0.9);}
+    100%{opacity:0;transform:scale(1.18);}
+  }
+  #moktakSvg{ position:relative; width:100%; height:100%; }
+  .moktak-wrap{ cursor:pointer; touch-action:manipulation; }
+  .ripple{
+    position:absolute;border-radius:50%;
+    border:1.5px solid rgba(90,58,20,0.55);
+    pointer-events:none;
+  }
+
+  .free-toggle{
+    margin-top:26px;display:flex;gap:8px;
+  }
+  .pill{
+    padding:9px 16px;border-radius:999px;font-size:12.5px;color:var(--muted);
+    border:1px solid var(--line);background:rgba(44,32,19,0.03);
+  }
+
+  /* ---------- SUTRA panel ---------- */
+  .sutra-panel{
+    position:absolute;left:0;right:0;bottom:0;z-index:4;
+    background:linear-gradient(180deg, rgba(36,27,19,0) 0%, var(--bg-3) 26px, var(--bg-3) 100%);
+    padding:18px 22px calc(20px + var(--safe-b));
+    transform:translateY(100%);transition:transform .4s cubic-bezier(.2,.8,.2,1);
+  }
+  .sutra-panel.show{ transform:translateY(0); }
+  .sutra-lines{
+    position:relative;
+    background:
+      radial-gradient(circle at 85% 12%, rgba(120,78,30,0.06), transparent 45%),
+      repeating-linear-gradient(0deg, rgba(120,78,30,0.05) 0px, rgba(120,78,30,0.05) 1px, transparent 1px, transparent 25px),
+      var(--paper);
+    border-radius:4px;
+    padding:22px 20px 22px 30px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(120,78,30,0.4), inset 0 0 0 4px var(--paper), inset 0 0 0 5px rgba(120,78,30,0.22);
+    text-align:center;
+    min-height:96px;
+    display:flex;flex-direction:column;justify-content:center;gap:8px;
+    overflow:hidden;
+  }
+  .sutra-lines::before{
+    content:'';
+    position:absolute;left:0;top:8px;bottom:8px;width:8px;
+    background-image:repeating-linear-gradient(180deg, rgba(80,52,18,0.6) 0px, rgba(80,52,18,0.6) 3px, transparent 3px, transparent 11px);
+    opacity:0.65;
+  }
+  .sutra-title-row{
+    display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:2px;flex-wrap:wrap;
+  }
+  .sutra-label-tag{
+    display:inline-block;background:#dfba70;border:1px solid rgba(80,52,18,0.55);
+    color:#3a2409;font-family:'Noto Serif KR',serif;font-size:12.5px;font-weight:700;
+    padding:3px 10px;border-radius:2px;letter-spacing:0.08em;
+    box-shadow:0 2px 4px rgba(0,0,0,0.15);
+  }
+  .sutra-sub{ color:var(--ink-soft); font-size:11.5px; }
+  .sutra-line{
+    font-family:'Noto Serif KR',serif;
+    color:var(--ink-soft);
+    font-size:14px;
+    opacity:0.42;
+    transition:opacity .3s ease, color .3s ease, font-size .3s ease;
+    line-height:1.5;
+  }
+  .sutra-line.current{
+    color:var(--ink);
+    opacity:1;
+    font-size:19px;
+    font-weight:600;
+  }
+  .sutra-controls{
+    display:flex;align-items:center;justify-content:center;gap:14px;margin-top:16px;
+  }
+  .ctrl-btn{
+    width:44px;height:44px;border-radius:50%;
+    background:rgba(44,32,19,0.06);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;color:var(--paper-2);
+    cursor:pointer;
+  }
+  .ctrl-btn.big{
+    width:52px;height:52px;background:var(--brass);color:#231809;border:none;
+  }
+  .ctrl-btn:active{ transform:scale(0.92); }
+  .ctrl-btn svg{ width:18px;height:18px; }
+  .ctrl-btn.big svg{ width:20px;height:20px; }
+  .tempo-row{
+    display:flex;align-items:center;gap:10px;margin-top:14px;padding:0 4px;
+  }
+  .tempo-row span{ font-size:11px; color:var(--muted); white-space:nowrap; }
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:3px;
+    background:rgba(44,32,19,0.16); outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+    background:var(--brass-light);cursor:pointer;border:2px solid var(--bg-3);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:15px;height:15px;border-radius:50%;background:var(--brass-light);border:2px solid var(--bg-3);cursor:pointer;
+  }
+
+  /* ---------- MENU SHEET ---------- */
+  .sheet-backdrop{
+    position:fixed;inset:0;background:rgba(10,7,5,0.55);
+    opacity:0;pointer-events:none;transition:opacity .3s ease;z-index:5;
+    backdrop-filter:blur(2px);
+  }
+  .sheet-backdrop.show{ opacity:1;pointer-events:auto; }
+  .sheet{
+    position:fixed;left:0;right:0;bottom:0;z-index:6;
+    background:var(--bg-3);
+    border-radius:26px 26px 0 0;
+    border-top:1px solid var(--line);
+    padding:10px 20px calc(26px + var(--safe-b));
+    transform:translateY(105%);
+    transition:transform .38s cubic-bezier(.2,.8,.2,1);
+    box-shadow:0 -20px 50px rgba(0,0,0,0.45);
+    max-height:78vh;overflow-y:auto;
+  }
+  .sheet.show{ transform:translateY(0); }
+  .sheet-handle{
+    width:36px;height:4px;border-radius:3px;background:rgba(44,32,19,0.25);
+    margin:6px auto 16px;
+  }
+  .sheet h3{ font-size:15px; color:var(--paper-2); margin-bottom:4px; padding:0 2px; }
+  .sheet-sub{ font-size:12px;color:var(--muted); padding:0 2px; margin-bottom:14px; }
+  .menu-list{ display:flex;flex-direction:column;gap:10px; }
+  .menu-item{
+    display:flex;align-items:center;gap:14px;
+    padding:14px 14px;border-radius:var(--radius-sm);
+    background:rgba(44,32,19,0.035);border:1px solid var(--line);
+    cursor:pointer;transition:background .2s;
+  }
+  .menu-item:active{ background:rgba(44,32,19,0.09); }
+  .menu-ico{
+    width:42px;height:42px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(201,151,63,0.14);color:var(--brass-light);
+  }
+  .menu-ico svg{ width:20px;height:20px; }
+  .menu-text b{ display:block;font-size:14.5px;color:var(--ink); font-weight:500; }
+  .menu-text span{ display:block;font-size:11.5px;color:var(--muted); margin-top:2px; }
+  .menu-chevron{ margin-left:auto; color:var(--muted); flex-shrink:0; }
+  .menu-chevron svg{ width:14px;height:14px; }
+
+  .sutra-pick-back{
+    display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12.5px;
+    margin-bottom:14px;cursor:pointer;padding:4px 2px;
+  }
+  .sutra-pick-back svg{ width:13px;height:13px; }
+
+  .sutra-cards{ display:flex;flex-direction:column;gap:10px; }
+  .sutra-card{
+    padding:16px 16px;border-radius:var(--radius-sm);
+    background:rgba(44,32,19,0.035);border:1px solid var(--line);cursor:pointer;
+  }
+  .sutra-card:active{ background:rgba(44,32,19,0.09); }
+  .sutra-card b{ font-family:'Noto Serif KR',serif;font-size:16px;color:var(--brass-light);font-weight:600; }
+  .sutra-card p{ margin:5px 0 0;font-size:12px;color:var(--muted);line-height:1.5; }
+
+  /* ---------- BEADS view ---------- */
+  #view-beads{ justify-content:flex-start; padding-top:8px; }
+  .beads-stage{
+    position:relative;width:min(78vw,300px);height:min(78vw,300px);
+    margin-top:6px;
+    display:flex;align-items:center;justify-content:center;
+    touch-action:none;
+  }
+  .beads-guide{
+    position:absolute;top:-2px;left:50%;transform:translateX(-50%);
+    width:2px;height:14px;background:var(--brass);border-radius:2px;opacity:0.6;
+  }
+  .beads-ring{
+    position:absolute;width:1px;height:1px;top:50%;left:50%;
+    transform:rotate(var(--ring-rot,0deg));
+  }
+  .bead{
+    position:absolute;top:0;left:0;width:38px;height:38px;margin:-19px;
+  }
+  .bead-face{
+    width:100%;height:100%;border-radius:50%;
+    background-size:cover;background-position:center;
+    box-shadow:inset -2px -3px 5px rgba(0,0,0,0.25), inset 1px 2px 3px rgba(255,255,255,0.14), 0 2px 5px rgba(0,0,0,0.4);
+    border:1px solid rgba(0,0,0,0.25);
+  }
+  .beads-center{
+    position:absolute;width:64px;height:64px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #3a2c1b, #1c140c 72%);
+    box-shadow:inset 0 0 0 1px rgba(201,151,63,0.25), 0 4px 14px rgba(0,0,0,0.4);
+    display:flex;align-items:center;justify-content:center;
+    color:#e6bf72;opacity:0.9;
+  }
+  .beads-center svg{ width:24px;height:24px; }
+  .beads-hint{ margin-top:22px;font-size:12px;color:var(--muted);text-align:center;max-width:240px;line-height:1.6; }
+  .beads-actions{ display:flex;gap:10px;margin-top:18px; }
+  .text-btn{
+    padding:10px 18px;border-radius:999px;font-size:12.5px;
+    border:1px solid var(--line);background:rgba(44,32,19,0.04);color:var(--paper-2);cursor:pointer;
+  }
+  .text-btn.primary{ background:var(--brass); color:#231809; border:none; font-weight:500; }
+  .text-btn:active{ transform:scale(0.96); }
+
+  /* bead editor */
+  .editor-backdrop{
+    position:fixed;inset:0;background:rgba(10,7,5,0.6);z-index:7;
+    opacity:0;pointer-events:none;transition:opacity .25s ease;
+    display:flex;align-items:flex-end;justify-content:center;
+  }
+  .editor-backdrop.show{ opacity:1;pointer-events:auto; }
+  .editor{
+    background:var(--bg-3);width:100%;border-radius:26px 26px 0 0;
+    padding:18px 22px calc(24px + var(--safe-b));
+    border-top:1px solid var(--line);
+    transform:translateY(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1);
+  }
+  .editor-backdrop.show .editor{ transform:translateY(0); }
+  .editor-top{ display:flex;align-items:center;justify-content:space-between;margin-bottom:14px; }
+  .editor-top h3{ font-size:14.5px;color:var(--paper-2); }
+  .editor-canvas-wrap{ display:flex;justify-content:center;margin:6px 0 16px; }
+  #beadCanvas{
+    width:150px;height:150px;border-radius:50%;
+    box-shadow:0 6px 20px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(201,151,63,0.2);
+    touch-action:none;cursor:crosshair;
+  }
+  .swatch-row{ display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-bottom:12px; }
+  .swatch{
+    width:26px;height:26px;border-radius:50%;cursor:pointer;
+    border:2px solid rgba(44,32,19,0.15);
+  }
+  .swatch.selected{ border-color:var(--brass-light); transform:scale(1.12); }
+  .swatch-label{ font-size:10.5px;color:var(--muted);text-align:center;margin-bottom:8px;letter-spacing:0.06em; }
+  .editor-actions{ display:flex;gap:10px;margin-top:14px; }
+  .editor-actions .text-btn{ flex:1;text-align:center; }
+
+  /* toast */
+  .toast{
+    position:fixed;left:50%;bottom:calc(30px + var(--safe-b));transform:translate(-50%,12px);
+    background:var(--paper);color:var(--ink);padding:10px 18px;border-radius:999px;
+    font-size:12.5px;box-shadow:0 8px 22px rgba(0,0,0,0.4);
+    opacity:0;pointer-events:none;transition:opacity .3s ease, transform .3s ease;z-index:20;
+  }
+  .toast.show{ opacity:1;transform:translate(-50%,0); }
+</style>
+</head>
+<body>
+
+<div class="embers" id="embers"></div>
+
+<div id="app">
+  <header>
+    <div class="icon-btn invisible" id="backBtn" aria-label="뒤로">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <div class="header-title" id="headerTitle">두드림</div>
+    <div class="icon-btn" id="menuBtn" aria-label="메뉴">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HOME VIEW -->
+    <section class="view active" id="view-home">
+      <div class="stage-label" id="homeLabel">자유롭게 두드려보세요</div>
+      <div class="moktak-wrap">
+        <div class="moktak-glow"></div>
+        <div class="moktak-ring" id="moktakRing"></div>
+        <svg id="moktakSvg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
+          <defs>
+            <radialGradient id="woodGrad" cx="35%" cy="26%" r="82%">
+              <stop offset="0%" stop-color="#f3c98a"/>
+              <stop offset="28%" stop-color="#dda054"/>
+              <stop offset="58%" stop-color="#a86830"/>
+              <stop offset="82%" stop-color="#6d3d1d"/>
+              <stop offset="100%" stop-color="#3c2110"/>
+            </radialGradient>
+            <linearGradient id="rimGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2a1608"/>
+              <stop offset="100%" stop-color="#160c05"/>
+            </linearGradient>
+            <linearGradient id="malletGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#f2d5a0"/>
+              <stop offset="55%" stop-color="#c68f4e"/>
+              <stop offset="100%" stop-color="#8a5626"/>
+            </linearGradient>
+            <radialGradient id="malletBallGrad" cx="35%" cy="30%" r="75%">
+              <stop offset="0%" stop-color="#f5dcae"/>
+              <stop offset="60%" stop-color="#c98f4c"/>
+              <stop offset="100%" stop-color="#7c4c22"/>
+            </radialGradient>
+          </defs>
+          <g id="moktakBody">
+            <path d="M58 172 m-36,0 a36,36 0 1,0 72,0 a36,36 0 1,0 -72,0 M58 172 m-18,0 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0" fill="url(#woodGrad)" fill-rule="evenodd" stroke="#2a1608" stroke-width="2"/>
+            <path d="M44 152 C38 160 37 170 43 179" fill="none" stroke="#fff3da" stroke-width="2" opacity="0.3" stroke-linecap="round"/>
+            <ellipse cx="128" cy="200" rx="56" ry="11" fill="rgba(0,0,0,0.38)" />
+            <circle cx="130" cy="106" r="80" fill="url(#rimGrad)"/>
+            <circle cx="130" cy="106" r="76" fill="url(#woodGrad)" stroke="#2a1608" stroke-width="2"/>
+            <path d="M78 58 C62 84 58 118 70 150 C78 172 96 188 118 196" fill="none" stroke="#5c3115" stroke-width="2" stroke-linecap="round" opacity="0.35"/>
+            <path d="M104 44 C84 70 76 104 86 136 C94 160 110 178 130 188" fill="none" stroke="#3f2210" stroke-width="1.3" stroke-linecap="round" opacity="0.28"/>
+            <path d="M176 56 C192 82 196 112 186 142 C178 164 162 182 142 192" fill="none" stroke="#3f2210" stroke-width="1.3" stroke-linecap="round" opacity="0.22"/>
+            <circle cx="176" cy="92" r="5.5" fill="#3f2210" opacity="0.6"/>
+            <circle cx="176" cy="92" r="10" fill="none" stroke="#3f2210" stroke-width="1.2" opacity="0.3"/>
+            <ellipse cx="100" cy="72" rx="32" ry="20" fill="#fff3da" opacity="0.28"/>
+            <ellipse cx="88" cy="64" rx="13" ry="8" fill="#fff8ec" opacity="0.34"/>
+          </g>
+          <g id="mallet" style="transform-origin:196px 66px;">
+            <rect x="150" y="56" width="70" height="10" rx="5" fill="url(#malletGrad)" stroke="#4a2c15" stroke-width="1.4" transform="rotate(28 196 66)"/>
+            <ellipse cx="150" cy="75" rx="9" ry="8" fill="url(#malletBallGrad)" stroke="#4a2c15" stroke-width="1.3"/>
+            <ellipse cx="146" cy="71" rx="3.3" ry="2.3" fill="#fff3da" opacity="0.55"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="free-toggle" id="freeHint">
+        <div class="pill">👆 두드려서 마음을 가라앉혀보세요</div>
+      </div>
+    </section>
+
+    <!-- SUTRA VIEW -->
+    <section class="view" id="view-sutra">
+      <div class="stage-label" id="sutraLabel">경전과 함께</div>
+      <div class="moktak-wrap" style="width:min(58vw,220px);height:min(58vw,220px);">
+        <div class="moktak-glow"></div>
+        <div class="moktak-ring" id="moktakRing2"></div>
+        <svg id="moktakSvg2" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
+          <defs>
+            <radialGradient id="woodGrad2" cx="35%" cy="26%" r="82%">
+              <stop offset="0%" stop-color="#f3c98a"/>
+              <stop offset="28%" stop-color="#dda054"/>
+              <stop offset="58%" stop-color="#a86830"/>
+              <stop offset="82%" stop-color="#6d3d1d"/>
+              <stop offset="100%" stop-color="#3c2110"/>
+            </radialGradient>
+            <linearGradient id="rimGrad2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2a1608"/>
+              <stop offset="100%" stop-color="#160c05"/>
+            </linearGradient>
+            <linearGradient id="malletGrad2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#f2d5a0"/>
+              <stop offset="55%" stop-color="#c68f4e"/>
+              <stop offset="100%" stop-color="#8a5626"/>
+            </linearGradient>
+            <radialGradient id="malletBallGrad2" cx="35%" cy="30%" r="75%">
+              <stop offset="0%" stop-color="#f5dcae"/>
+              <stop offset="60%" stop-color="#c98f4c"/>
+              <stop offset="100%" stop-color="#7c4c22"/>
+            </radialGradient>
+          </defs>
+          <g id="moktakBody2">
+            <path d="M58 172 m-36,0 a36,36 0 1,0 72,0 a36,36 0 1,0 -72,0 M58 172 m-18,0 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0" fill="url(#woodGrad2)" fill-rule="evenodd" stroke="#2a1608" stroke-width="2"/>
+            <path d="M44 152 C38 160 37 170 43 179" fill="none" stroke="#fff3da" stroke-width="2" opacity="0.3" stroke-linecap="round"/>
+            <ellipse cx="128" cy="200" rx="56" ry="11" fill="rgba(0,0,0,0.38)" />
+            <circle cx="130" cy="106" r="80" fill="url(#rimGrad2)"/>
+            <circle cx="130" cy="106" r="76" fill="url(#woodGrad2)" stroke="#2a1608" stroke-width="2"/>
+            <path d="M78 58 C62 84 58 118 70 150 C78 172 96 188 118 196" fill="none" stroke="#5c3115" stroke-width="2" stroke-linecap="round" opacity="0.35"/>
+            <path d="M104 44 C84 70 76 104 86 136 C94 160 110 178 130 188" fill="none" stroke="#3f2210" stroke-width="1.3" stroke-linecap="round" opacity="0.28"/>
+            <path d="M176 56 C192 82 196 112 186 142 C178 164 162 182 142 192" fill="none" stroke="#3f2210" stroke-width="1.3" stroke-linecap="round" opacity="0.22"/>
+            <circle cx="176" cy="92" r="5.5" fill="#3f2210" opacity="0.6"/>
+            <circle cx="176" cy="92" r="10" fill="none" stroke="#3f2210" stroke-width="1.2" opacity="0.3"/>
+            <ellipse cx="100" cy="72" rx="32" ry="20" fill="#fff3da" opacity="0.28"/>
+            <ellipse cx="88" cy="64" rx="13" ry="8" fill="#fff8ec" opacity="0.34"/>
+          </g>
+          <g id="mallet2" style="transform-origin:196px 66px;">
+            <rect x="150" y="56" width="70" height="10" rx="5" fill="url(#malletGrad2)" stroke="#4a2c15" stroke-width="1.4" transform="rotate(28 196 66)"/>
+            <ellipse cx="150" cy="75" rx="9" ry="8" fill="url(#malletBallGrad2)" stroke="#4a2c15" stroke-width="1.3"/>
+            <ellipse cx="146" cy="71" rx="3.3" ry="2.3" fill="#fff3da" opacity="0.55"/>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- BEADS VIEW -->
+    <section class="view" id="view-beads">
+      <div class="beads-stage" id="beadsStage">
+        <div class="beads-guide"></div>
+        <div class="beads-ring" id="beadsRing"></div>
+        <div class="beads-center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </div>
+      </div>
+      <div class="beads-hint">구슬을 눌러 색과 그림을 꾸미고, 원을 돌려 소리를 들어보세요</div>
+      <div class="beads-actions">
+        <button class="text-btn" id="beadsResetBtn">초기화</button>
+        <button class="text-btn primary" id="beadsSaveBtn">저장하기</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- hidden defs source (referenced via <use>) -->
+<svg width="0" height="0" style="position:absolute">
+</svg>
+
+<!-- SUTRA text panel -->
+<div class="sutra-panel" id="sutraPanel">
+  <div class="sutra-lines" id="sutraLines">
+    <div class="sutra-title-row"><span class="sutra-label-tag" id="sutraHanja"></span><b id="sutraTitleText" style="font-family:'Noto Serif KR',serif;color:var(--ink);font-size:15px;"></b></div>
+    <div class="sutra-sub" id="sutraSub"></div>
+    <div class="sutra-line" id="lineA"></div>
+    <div class="sutra-line current" id="lineB"></div>
+    <div class="sutra-line" id="lineC"></div>
+  </div>
+  <div class="sutra-controls">
+    <div class="ctrl-btn" id="restartBtn" title="처음으로">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+    </div>
+    <div class="ctrl-btn big" id="playPauseBtn" title="자동으로 넘기기 켜기/끄기">
+      <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+    </div>
+    <div class="ctrl-btn" id="stopBtn" title="자유 모드로">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </div>
+  </div>
+  <div class="tempo-row">
+    <span>천천히</span>
+    <input type="range" id="tempoSlider" min="1100" max="3200" step="50" value="2200" />
+    <span>빠르게</span>
+  </div>
+</div>
+
+<!-- MENU SHEET -->
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-handle"></div>
+
+  <div id="menuRoot">
+    <h3>메뉴</h3>
+    <div class="sheet-sub">오늘은 어떤 시간을 가져볼까요</div>
+    <div class="menu-list">
+      <div class="menu-item" data-action="home">
+        <div class="menu-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M9 12h6"/></svg>
+        </div>
+        <div class="menu-text"><b>목탁 두드리기</b><span>경전 없이 자유롭게</span></div>
+        <div class="menu-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+      </div>
+      <div class="menu-item" data-action="sutra-list">
+        <div class="menu-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 4h9l3 3v13H6z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
+        </div>
+        <div class="menu-text"><b>경전과 함께</b><span>반야심경 · 천수경 · 묘법연화경</span></div>
+        <div class="menu-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+      </div>
+      <div class="menu-item" data-action="beads">
+        <div class="menu-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="5" r="2"/><circle cx="18" cy="10" r="2"/><circle cx="18" cy="17" r="2"/><circle cx="12" cy="21" r="2"/><circle cx="6" cy="17" r="2"/><circle cx="6" cy="10" r="2"/></svg>
+        </div>
+        <div class="menu-text"><b>나만의 염주</b><span>색과 그림으로 꾸미고 돌려보기</span></div>
+        <div class="menu-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sutraListRoot" style="display:none;">
+    <div class="sutra-pick-back" id="sutraListBack">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+      메뉴로
+    </div>
+    <h3>경전 고르기</h3>
+    <div class="sheet-sub">선택하면 목탁 소리와 함께 문구가 흘러갑니다</div>
+    <div class="sutra-cards">
+      <div class="sutra-card" data-sutra="banya"><b>반야심경</b><p>마하반야바라밀다심경 · 공(空)의 지혜를 담은 짧고 깊은 경전</p></div>
+      <div class="sutra-card" data-sutra="cheonsu"><b>천수경</b><p>관세음보살의 자비를 구하는 발원 · 마음을 씻어내는 기도문 (발췌)</p></div>
+      <div class="sutra-card" data-sutra="beophwa"><b>묘법연화경</b><p>법화경 개경게와 핵심 게송 · 누구나 성불할 수 있다는 가르침 (발췌)</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- BEAD EDITOR -->
+<div class="editor-backdrop" id="editorBackdrop">
+  <div class="editor">
+    <div class="editor-top">
+      <h3>구슬 꾸미기</h3>
+      <div class="icon-btn" id="editorClose" style="width:34px;height:34px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </div>
+    </div>
+    <div class="editor-canvas-wrap">
+      <canvas id="beadCanvas" width="150" height="150"></canvas>
+    </div>
+    <div class="swatch-label">바탕색</div>
+    <div class="swatch-row" id="baseSwatches"></div>
+    <div class="swatch-label">그림 색</div>
+    <div class="swatch-row" id="brushSwatches"></div>
+    <div class="editor-actions">
+      <button class="text-btn" id="clearDrawBtn">지우기</button>
+      <button class="text-btn primary" id="applyBeadBtn">완료</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= embers ================= */
+  var emberHost = document.getElementById('embers');
+  for(var i=0;i<7;i++){
+    var e = document.createElement('div');
+    e.className='ember';
+    var left = 6 + Math.random()*88;
+    var dur = 9 + Math.random()*9;
+    var delay = Math.random()*10;
+    var drift = (Math.random()*40-20).toFixed(0)+'px';
+    e.style.left = left+'vw';
+    e.style.animationDuration = dur+'s';
+    e.style.animationDelay = delay+'s';
+    e.style.setProperty('--drift', drift);
+    emberHost.appendChild(e);
+  }
+
+  /* ================= audio ================= */
+  var actx = null;
+  function ctx(){
+    if(!actx){
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if(actx.state === 'suspended'){ actx.resume(); }
+    return actx;
+  }
+  function noiseBuffer(ac, dur){
+    var len = Math.max(1, Math.floor(ac.sampleRate*dur));
+    var buf = ac.createBuffer(1, len, ac.sampleRate);
+    var d = buf.getChannelData(0);
+    for(var i=0;i<len;i++){ d[i] = (Math.random()*2-1); }
+    return buf;
+  }
+  function playMoktak(vel){
+    vel = vel || 1;
+    var ac = ctx();
+    var t0 = ac.currentTime;
+
+    // soft, dark attack — no bright click
+    var nb = noiseBuffer(ac, 0.045);
+    var src = ac.createBufferSource(); src.buffer = nb;
+    var bp = ac.createBiquadFilter(); bp.type='bandpass';
+    bp.frequency.setValueAtTime(1250, t0); bp.Q.value = 1.6;
+    var ng = ac.createGain();
+    ng.gain.setValueAtTime(0.4*vel, t0);
+    ng.gain.exponentialRampToValueAtTime(0.0004, t0+0.05);
+    src.connect(bp); bp.connect(ng); ng.connect(ac.destination);
+    src.start(t0); src.stop(t0+0.06);
+
+    // dark wood body
+    var osc = ac.createOscillator();
+    osc.type='triangle';
+    osc.frequency.setValueAtTime(500, t0);
+    osc.frequency.exponentialRampToValueAtTime(450, t0+0.1);
+    var og = ac.createGain();
+    og.gain.setValueAtTime(0.0001, t0);
+    og.gain.exponentialRampToValueAtTime(0.44*vel, t0+0.006);
+    og.gain.exponentialRampToValueAtTime(0.0001, t0+0.15);
+    osc.connect(og); og.connect(ac.destination);
+    osc.start(t0); osc.stop(t0+0.17);
+
+    // slightly detuned twin voice — a touch of natural wooden "beat"
+    var osc2 = ac.createOscillator();
+    osc2.type='triangle';
+    osc2.frequency.setValueAtTime(512, t0);
+    var og2 = ac.createGain();
+    og2.gain.setValueAtTime(0.0001, t0);
+    og2.gain.exponentialRampToValueAtTime(0.18*vel, t0+0.008);
+    og2.gain.exponentialRampToValueAtTime(0.0001, t0+0.16);
+    osc2.connect(og2); og2.connect(ac.destination);
+    osc2.start(t0); osc2.stop(t0+0.18);
+
+    // low dark body weight
+    var osc3 = ac.createOscillator();
+    osc3.type='sine';
+    osc3.frequency.setValueAtTime(165, t0);
+    var og3 = ac.createGain();
+    og3.gain.setValueAtTime(0.0001, t0);
+    og3.gain.exponentialRampToValueAtTime(0.24*vel, t0+0.006);
+    og3.gain.exponentialRampToValueAtTime(0.0001, t0+0.11);
+    osc3.connect(og3); og3.connect(ac.destination);
+    osc3.start(t0); osc3.stop(t0+0.12);
+  }
+  var lastBeadPitch = 0;
+  function playBeadClick(){
+    var ac = ctx();
+    var t0 = ac.currentTime;
+    // dull wooden clack — muffled mid-range knock, no bright high end
+    var nb = noiseBuffer(ac, 0.06);
+    var src = ac.createBufferSource(); src.buffer = nb;
+    var bp = ac.createBiquadFilter(); bp.type='bandpass';
+    lastBeadPitch = 520 + Math.random()*180;
+    bp.frequency.value = lastBeadPitch; bp.Q.value=1.1;
+    var lp = ac.createBiquadFilter(); lp.type='lowpass';
+    lp.frequency.value = 1100;
+    var g = ac.createGain();
+    g.gain.setValueAtTime(0.26, t0);
+    g.gain.exponentialRampToValueAtTime(0.0003, t0+0.09);
+    src.connect(bp); bp.connect(lp); lp.connect(g); g.connect(ac.destination);
+    src.start(t0); src.stop(t0+0.1);
+
+    // low wooden thump underneath for weight
+    var o = ac.createOscillator();
+    o.type='sine';
+    o.frequency.setValueAtTime(175 + Math.random()*30, t0);
+    var og = ac.createGain();
+    og.gain.setValueAtTime(0.0001, t0);
+    og.gain.exponentialRampToValueAtTime(0.16, t0+0.006);
+    og.gain.exponentialRampToValueAtTime(0.0001, t0+0.1);
+    o.connect(og); og.connect(ac.destination);
+    o.start(t0); o.stop(t0+0.11);
+  }
+
+  /* ================= view routing ================= */
+  var views = {
+    home: document.getElementById('view-home'),
+    sutra: document.getElementById('view-sutra'),
+    beads: document.getElementById('view-beads')
+  };
+  var titles = { home:'두드림', sutra:'경전과 함께', beads:'나만의 염주' };
+  var backBtn = document.getElementById('backBtn');
+  var headerTitle = document.getElementById('headerTitle');
+  var sutraPanel = document.getElementById('sutraPanel');
+  var currentView = 'home';
+
+  function goView(name){
+    if(name !== 'sutra'){ stopSutra(); }
+    currentView = name;
+    Object.keys(views).forEach(function(k){ views[k].classList.toggle('active', k===name); });
+    headerTitle.textContent = (name==='sutra' && activeSutra) ? SUTRAS[activeSutra].title : titles[name];
+    backBtn.classList.toggle('invisible', name==='home');
+    sutraPanel.classList.toggle('show', name==='sutra');
+  }
+  backBtn.addEventListener('click', function(){ goView('home'); });
+
+  /* ================= menu sheet ================= */
+  var sheet = document.getElementById('sheet');
+  var sheetBackdrop = document.getElementById('sheetBackdrop');
+  var menuBtn = document.getElementById('menuBtn');
+  var menuRoot = document.getElementById('menuRoot');
+  var sutraListRoot = document.getElementById('sutraListRoot');
+
+  function openSheet(){
+    sheet.classList.add('show'); sheetBackdrop.classList.add('show');
+    menuRoot.style.display=''; sutraListRoot.style.display='none';
+  }
+  function closeSheet(){
+    sheet.classList.remove('show'); sheetBackdrop.classList.remove('show');
+  }
+  menuBtn.addEventListener('click', openSheet);
+  sheetBackdrop.addEventListener('click', closeSheet);
+
+  document.querySelectorAll('.menu-item').forEach(function(el){
+    el.addEventListener('click', function(){
+      var action = el.getAttribute('data-action');
+      if(action==='home'){ goView('home'); closeSheet(); }
+      else if(action==='beads'){ goView('beads'); closeSheet(); }
+      else if(action==='sutra-list'){
+        menuRoot.style.display='none'; sutraListRoot.style.display='';
+      }
+    });
+  });
+  document.getElementById('sutraListBack').addEventListener('click', function(){
+    sutraListRoot.style.display='none'; menuRoot.style.display='';
+  });
+  document.querySelectorAll('.sutra-card').forEach(function(el){
+    el.addEventListener('click', function(){
+      var key = el.getAttribute('data-sutra');
+      startSutra(key);
+      closeSheet();
+    });
+  });
+
+  /* ================= moktak tap (home) ================= */
+  function strikeMallet(malletEl, bodyEl, wrapEl, ringEl){
+    if(malletEl.animate){
+      malletEl.animate([
+        {transform:'rotate(0deg)'},
+        {transform:'rotate(-34deg)'},
+        {transform:'rotate(4deg)'},
+        {transform:'rotate(0deg)'}
+      ], {duration:190, easing:'ease-out'});
+    }
+    if(bodyEl.animate){
+      bodyEl.animate([
+        {transform:'scale(1)'},
+        {transform:'scale(0.965)'},
+        {transform:'scale(1)'}
+      ], {duration:160, easing:'ease-out'});
+    }
+    if(ringEl){
+      ringEl.classList.remove('pulse'); void ringEl.offsetWidth; ringEl.classList.add('pulse');
+    }
+  }
+
+  function ripple(wrapEl, x, y){
+    var r = document.createElement('div');
+    r.className='ripple';
+    var size = 14;
+    r.style.width=size+'px'; r.style.height=size+'px';
+    r.style.left=(x-size/2)+'px'; r.style.top=(y-size/2)+'px';
+    wrapEl.appendChild(r);
+    if(r.animate){
+      var anim = r.animate([
+        {transform:'scale(1)', opacity:0.7},
+        {transform:'scale(5.5)', opacity:0}
+      ], {duration:520, easing:'ease-out'});
+      anim.onfinish = function(){ r.remove(); };
+    } else { setTimeout(function(){ r.remove(); }, 520); }
+  }
+
+  function bindMoktak(svgId, wrapSelector, malletId, ringId, onTap){
+    var svg = document.getElementById(svgId);
+    var wrap = svg.closest('.moktak-wrap');
+    var mallet = document.getElementById(malletId);
+    var ring = document.getElementById(ringId);
+    wrap.addEventListener('pointerdown', function(ev){
+      ev.preventDefault();
+      playMoktak(0.85 + Math.random()*0.3);
+      strikeMallet(mallet, svg, wrap, ring);
+      var rect = wrap.getBoundingClientRect();
+      ripple(wrap, ev.clientX-rect.left, ev.clientY-rect.top);
+      if(currentView==='home'){ pulseHomeHint(); }
+      if(onTap){ onTap(); }
+    });
+  }
+  bindMoktak('moktakSvg', '.moktak-wrap', 'mallet', 'moktakRing');
+  bindMoktak('moktakSvg2', '.moktak-wrap', 'mallet2', 'moktakRing2');
+
+  var homeHintTimer = null;
+  function pulseHomeHint(){
+    var label = document.getElementById('homeLabel');
+    label.textContent = '마음이 차분해지고 있어요';
+    clearTimeout(homeHintTimer);
+    homeHintTimer = setTimeout(function(){ label.textContent='자유롭게 두드려보세요'; }, 2600);
+  }
+
+  /* ================= sutra data ================= */
+  var SUTRAS = {
+    banya:{
+      title:'반야심경',
+      hanja:'般若心經',
+      subtitle:'마하반야바라밀다심경',
+      lines:['마하반야바라밀다심경','관자재보살','행심반야바라밀다시','조견오온개공','도일체고액','사리자','색불이공 공불이색','색즉시공 공즉시색','수상행식 역부여시','사리자','시제법공상','불생불멸 불구부정 부증불감','시고 공중무색','무수상행식','무안이비설신의','무색성향미촉법','무안계 내지 무의식계','무무명 역무무명진','내지 무노사 역무노사진','무고집멸도','무지역무득','이무소득고','보리살타','의반야바라밀다고 심무가애','무가애고 무유공포','원리전도몽상','구경열반','삼세제불','의반야바라밀다고','득아뇩다라삼먁삼보리','고지 반야바라밀다','시대신주 시대명주','시무상주 시무등등주','능제일체고 진실불허','고설반야바라밀다주 즉설주왈','아제아제','바라아제','바라승아제','모지 사바하']
+    },
+    cheonsu:{
+      title:'천수경',
+      hanja:'千手經',
+      subtitle:'천수천안관세음보살 발원 (발췌)',
+      lines:['천수경','정구업진언','수리수리 마하수리 수수리 사바하','오방내외안위제신진언','나무 사만다 못다남 옴 도로도로 지미 사바하','개경게','무상심심미묘법','백천만겁난조우','아금문견득수지','원해여래진실의','개법장진언','옴 아라남 아라다','계수관음대비주','원력홍심상호신','천비장엄보호지','천안광명변관조','진실어중선밀어','무위심내기비심','속령만족제희구','영사멸제제죄업','나무대비관세음','원아속지일체법','나무대비관세음','원아조득지혜안']
+    },
+    beophwa:{
+      title:'묘법연화경',
+      hanja:'妙法蓮華經',
+      subtitle:'법화경 개경게 · 방편품 게송 (발췌)',
+      lines:['묘법연화경','개경게','무상심심미묘법','백천만겁난조우','아금문견득수지','원해여래진실의','개법장진언','옴 아라남 아라다','방편품 게송','제법종본래','상자적멸상','불자행도이','내세득작불','나무묘법연화경']
+    }
+  };
+
+  var activeSutra = null;
+  var lineIdx = 0;
+  var sutraTimer = null;
+  var sutraPlaying = false;
+
+  var lineA = document.getElementById('lineA');
+  var lineB = document.getElementById('lineB');
+  var lineC = document.getElementById('lineC');
+  var sutraTitleText = document.getElementById('sutraTitleText');
+  var sutraSub = document.getElementById('sutraSub');
+  var tempoSlider = document.getElementById('tempoSlider');
+  var playIcon = document.getElementById('playIcon');
+  var pauseIcon = document.getElementById('pauseIcon');
+
+  function renderLines(){
+    var d = SUTRAS[activeSutra];
+    var n = d.lines.length;
+    var prev = d.lines[(lineIdx-1+n)%n];
+    var cur = d.lines[lineIdx%n];
+    var next = d.lines[(lineIdx+1)%n];
+    lineA.textContent = prev;
+    lineB.textContent = cur;
+    lineC.textContent = next;
+  }
+
+  function startSutra(key){
+    activeSutra = key;
+    lineIdx = 0;
+    var d = SUTRAS[key];
+    sutraTitleText.textContent = d.title;
+    document.getElementById('sutraHanja').textContent = d.hanja;
+    sutraSub.textContent = d.subtitle;
+    renderLines();
+    goView('sutra');
+    headerTitle.textContent = d.title;
+    document.getElementById('sutraLabel').textContent = '경전이 흐르는 동안 목탁은 직접 두드려보세요';
+    playSutra();
+  }
+
+  function stepLine(){
+    lineIdx++;
+    renderLines();
+  }
+
+  function playSutra(){
+    sutraPlaying = true;
+    playIcon.style.display='none'; pauseIcon.style.display='';
+    clearInterval(sutraTimer);
+    var tempo = parseInt(tempoSlider.value,10);
+    sutraTimer = setInterval(tick, tempo);
+    function tick(){
+      // 경전 문구만 스스로 넘어가고, 목탁 소리는 사용자가 직접 두드릴 때만 납니다
+      stepLine();
+    }
+  }
+  function pauseSutra(){
+    sutraPlaying = false;
+    playIcon.style.display=''; pauseIcon.style.display='none';
+    clearInterval(sutraTimer);
+  }
+  function stopSutra(){
+    pauseSutra();
+    activeSutra = null;
+  }
+
+  document.getElementById('playPauseBtn').addEventListener('click', function(){
+    if(sutraPlaying){ pauseSutra(); } else { playSutra(); }
+  });
+  document.getElementById('restartBtn').addEventListener('click', function(){
+    lineIdx = 0; renderLines();
+  });
+  document.getElementById('stopBtn').addEventListener('click', function(){
+    goView('home');
+  });
+  tempoSlider.addEventListener('input', function(){
+    if(sutraPlaying){ playSutra(); }
+  });
+
+  /* ================= BEADS ================= */
+  var BEAD_COUNT = 18;
+  var RADIUS = 124;
+  var STEP = 360/BEAD_COUNT;
+  var beadsRing = document.getElementById('beadsRing');
+  var beadsStage = document.getElementById('beadsStage');
+  var rotation = 0;
+  var beads = [];
+
+  var PALETTE = ['#c9973f','#4d6a56','#a8492e','#e8d8b2','#3a3f52','#7c3f53','#2c2013','#8fae8a'];
+
+  function defaultBead(i){
+    return { color: PALETTE[i % PALETTE.length], pattern: null };
+  }
+
+  function buildBeadDOM(){
+    beadsRing.innerHTML = '';
+    for(var i=0;i<BEAD_COUNT;i++){
+      var angle = i*STEP;
+      var b = document.createElement('div');
+      b.className='bead';
+      b.style.transform = 'rotate('+angle+'deg) translateY(-'+RADIUS+'px)';
+      var face = document.createElement('div');
+      face.className='bead-face';
+      face.style.transform = 'rotate(calc(-1 * var(--ring-rot,0deg)))';
+      face.dataset.index = i;
+      b.appendChild(face);
+      beadsRing.appendChild(b);
+    }
+  }
+
+  function applyBeadVisual(i){
+    var face = beadsRing.children[i].querySelector('.bead-face');
+    var data = beads[i];
+    face.style.backgroundColor = data.color;
+    if(data.pattern){ face.style.backgroundImage = 'url('+data.pattern+')'; }
+    else { face.style.backgroundImage = 'none'; }
+  }
+
+  function loadBeads(){
+    var saved = null;
+    try{
+      var raw = localStorage.getItem('ddeudeurim_beads_v1');
+      if(raw){ saved = JSON.parse(raw); }
+    }catch(e){ saved = null; }
+    beads = [];
+    for(var i=0;i<BEAD_COUNT;i++){
+      if(saved && saved[i]){ beads.push(saved[i]); }
+      else { beads.push(defaultBead(i)); }
+    }
+    buildBeadDOM();
+    for(var j=0;j<BEAD_COUNT;j++){ applyBeadVisual(j); }
+    prevStepIndex = Math.floor(rotation/STEP);
+    beadsRing.style.setProperty('--ring-rot', rotation+'deg');
+  }
+
+  function saveBeads(){
+    try{
+      localStorage.setItem('ddeudeurim_beads_v1', JSON.stringify(beads));
+      showToast('나만의 염주가 저장되었어요');
+    }catch(e){
+      showToast('저장할 수 없어요');
+    }
+  }
+
+  document.getElementById('beadsSaveBtn').addEventListener('click', saveBeads);
+  document.getElementById('beadsResetBtn').addEventListener('click', function(){
+    beads = [];
+    for(var i=0;i<BEAD_COUNT;i++){ beads.push(defaultBead(i)); }
+    for(var j=0;j<BEAD_COUNT;j++){ applyBeadVisual(j); }
+    try{ localStorage.removeItem('ddeudeurim_beads_v1'); }catch(e){}
+    showToast('염주를 초기화했어요');
+  });
+
+  /* rotation drag with inertia */
+  var dragging=false, dragStartAngle=0, dragStartRotation=0, lastAngle=0, lastTime=0, velocity=0;
+  var inertiaRaf=null;
+  var prevStepIndex = 0;
+
+  function angleFromCenter(clientX, clientY){
+    var rect = beadsStage.getBoundingClientRect();
+    var cx = rect.left+rect.width/2, cy = rect.top+rect.height/2;
+    var dx = clientX-cx, dy = clientY-cy;
+    return Math.atan2(dy,dx)*180/Math.PI + 90; // 0 = up
+  }
+
+  function setRotation(r){
+    rotation = r;
+    beadsRing.style.setProperty('--ring-rot', r+'deg');
+    var stepIdx = Math.floor(rotation/STEP);
+    if(stepIdx !== prevStepIndex){
+      var diff = Math.abs(stepIdx - prevStepIndex);
+      var plays = Math.min(diff, 4);
+      for(var k=0;k<plays;k++){ playBeadClick(); }
+      prevStepIndex = stepIdx;
+    }
+  }
+
+  var moved = false;
+  var pointerDownTarget = null;
+
+  beadsStage.addEventListener('pointerdown', function(ev){
+    cancelAnimationFrame(inertiaRaf);
+    dragging = true; moved=false;
+    pointerDownTarget = ev.target;
+    dragStartAngle = angleFromCenter(ev.clientX, ev.clientY);
+    dragStartRotation = rotation;
+    lastAngle = dragStartAngle; lastTime = performance.now(); velocity=0;
+    beadsStage.setPointerCapture(ev.pointerId);
+  });
+  beadsStage.addEventListener('pointermove', function(ev){
+    if(!dragging) return;
+    var a = angleFromCenter(ev.clientX, ev.clientY);
+    var delta = a - dragStartAngle;
+    // normalize delta into -180..180 shortest path accumulation is tricky; use continuous unwrap
+    if(Math.abs(delta) > 3){ moved = true; }
+    var now = performance.now();
+    var dt = now-lastTime;
+    var instDelta = a - lastAngle;
+    if(instDelta>180) instDelta-=360; if(instDelta<-180) instDelta+=360;
+    if(dt>0){ velocity = instDelta/dt; }
+    lastAngle=a; lastTime=now;
+    setRotation(dragStartRotation + unwrap(delta));
+  });
+  var unwrapOffset=0, lastRawDelta=0;
+  function unwrap(delta){
+    // simple shortest-path unwrap relative to previous frame call is complex;
+    // fallback: just use raw delta with wrap correction based on lastRawDelta
+    var d = delta;
+    while(d - lastRawDelta > 180) d -= 360;
+    while(d - lastRawDelta < -180) d += 360;
+    lastRawDelta = d;
+    return d;
+  }
+  function endDrag(ev){
+    if(!dragging) return;
+    dragging=false;
+    lastRawDelta=0;
+    if(!moved && pointerDownTarget && pointerDownTarget.classList.contains('bead-face')){
+      openEditor(parseInt(pointerDownTarget.dataset.index,10));
+      return;
+    }
+    // inertia
+    var v = velocity; // deg/ms
+    var last = performance.now();
+    function step(){
+      var now = performance.now();
+      var dt = now-last; last=now;
+      v *= 0.94;
+      if(Math.abs(v) < 0.005){ return; }
+      setRotation(rotation + v*dt);
+      inertiaRaf = requestAnimationFrame(step);
+    }
+    if(Math.abs(v) > 0.02){ inertiaRaf = requestAnimationFrame(step); }
+  }
+  beadsStage.addEventListener('pointerup', endDrag);
+  beadsStage.addEventListener('pointercancel', endDrag);
+
+  /* bead editor */
+  var editorBackdrop = document.getElementById('editorBackdrop');
+  var beadCanvas = document.getElementById('beadCanvas');
+  var bctx = beadCanvas.getContext('2d');
+  var editingIndex = -1;
+  var currentBase = PALETTE[0];
+  var currentBrush = '#2c2013';
+  var drawing=false;
+
+  function paintBaseCircle(color){
+    bctx.clearRect(0,0,150,150);
+    bctx.fillStyle = color;
+    bctx.beginPath(); bctx.arc(75,75,74,0,Math.PI*2); bctx.fill();
+  }
+
+  function openEditor(i){
+    editingIndex = i;
+    var d = beads[i];
+    currentBase = d.color || PALETTE[0];
+    paintBaseCircle(currentBase);
+    if(d.pattern){
+      var img = new Image();
+      img.onload = function(){ bctx.drawImage(img,0,0,150,150); };
+      img.src = d.pattern;
+    }
+    highlightSwatch(baseSwatchEls, currentBase);
+    highlightSwatch(brushSwatchEls, currentBrush);
+    editorBackdrop.classList.add('show');
+  }
+  function closeEditor(applyFirst){
+    if(applyFirst && editingIndex>=0){
+      beads[editingIndex].color = currentBase;
+      try{ beads[editingIndex].pattern = beadCanvas.toDataURL('image/png'); }catch(e){}
+      applyBeadVisual(editingIndex);
+    }
+    editorBackdrop.classList.remove('show');
+    editingIndex = -1;
+  }
+  document.getElementById('editorClose').addEventListener('click', function(){ closeEditor(false); });
+  document.getElementById('applyBeadBtn').addEventListener('click', function(){ closeEditor(true); });
+  document.getElementById('clearDrawBtn').addEventListener('click', function(){ paintBaseCircle(currentBase); });
+
+  function canvasPos(ev){
+    var rect = beadCanvas.getBoundingClientRect();
+    var x = (ev.clientX-rect.left) * (150/rect.width);
+    var y = (ev.clientY-rect.top) * (150/rect.height);
+    return {x:x,y:y};
+  }
+  beadCanvas.addEventListener('pointerdown', function(ev){
+    drawing=true;
+    var p = canvasPos(ev);
+    bctx.beginPath(); bctx.moveTo(p.x,p.y);
+    bctx.lineWidth=9; bctx.lineCap='round'; bctx.strokeStyle=currentBrush;
+    bctx.lineTo(p.x+0.1,p.y+0.1); bctx.stroke();
+    beadCanvas.setPointerCapture(ev.pointerId);
+  });
+  beadCanvas.addEventListener('pointermove', function(ev){
+    if(!drawing) return;
+    var p = canvasPos(ev);
+    bctx.lineTo(p.x,p.y); bctx.stroke();
+  });
+  beadCanvas.addEventListener('pointerup', function(){ drawing=false; });
+  beadCanvas.addEventListener('pointercancel', function(){ drawing=false; });
+
+  var baseSwatches = document.getElementById('baseSwatches');
+  var brushSwatches = document.getElementById('brushSwatches');
+  var baseSwatchEls=[], brushSwatchEls=[];
+  var BRUSH_COLORS = ['#2c2013','#f1e6cc','#c9973f','#a8492e','#4d6a56','#3a3f52'];
+
+  function highlightSwatch(list, color){
+    list.forEach(function(el){ el.classList.toggle('selected', el.dataset.color.toLowerCase()===color.toLowerCase()); });
+  }
+
+  PALETTE.forEach(function(c){
+    var s = document.createElement('div');
+    s.className='swatch'; s.style.background=c; s.dataset.color=c;
+    s.addEventListener('click', function(){
+      currentBase = c;
+      // repaint base while keeping drawing: simplest is repaint background then it's a fresh circle
+      paintBaseCircle(c);
+      highlightSwatch(baseSwatchEls, c);
+    });
+    baseSwatches.appendChild(s); baseSwatchEls.push(s);
+  });
+  BRUSH_COLORS.forEach(function(c){
+    var s = document.createElement('div');
+    s.className='swatch'; s.style.background=c; s.dataset.color=c;
+    s.addEventListener('click', function(){
+      currentBrush = c;
+      highlightSwatch(brushSwatchEls, c);
+    });
+    brushSwatches.appendChild(s); brushSwatchEls.push(s);
+  });
+
+  /* ================= toast ================= */
+  var toastTimer=null;
+  function showToast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+  }
+
+  /* ================= init ================= */
+  loadBeads();
+  goView('home');
+
+})();
+</script>
+</body>
+</html>
